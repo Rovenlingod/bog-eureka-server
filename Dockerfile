@@ -1,6 +1,10 @@
+# Build stage
+FROM maven:3.6.3-jdk-8-slim AS build
+COPY src /home/app/src
+COPY pom.xml /home/app
+RUN mvn -f /home/app/pom.xml clean test package
+# Package stage
 FROM openjdk:11
-ENV APP_HOME=/usr/app
-WORKDIR $APP_HOME
-COPY target/bog-eureka-server-0.0.1-SNAPSHOT.jar docker-spring.jar
+COPY --from=build /home/app/target/*.jar app.jar
 EXPOSE 8661
-CMD ["java", "-jar", "docker-spring.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
